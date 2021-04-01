@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "paperdoll",
+  "version": "${version}",
+
+  "name": "Paper Doll",
+  "description": "Bedrock Paper Doll ported to Minecraft Java",
+  "authors": [
+    "Francy-Chan"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Francy-chan/PaperDoll-1.17",
+    "sources": "https://github.com/Francy-chan/PaperDoll-1.17",
+    "issues": "https://github.com/Francy-chan/PaperDoll-1.17/issues"
+  },
+
+  "license": "MIT",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.dreemurr.paperdoll.PaperDoll"
+    ]
+  },
+
+  "mixins": [
+    "paperdoll.mixins.json"
+  ],
+
+  "depends": {},
+  "suggests": {}
+}
