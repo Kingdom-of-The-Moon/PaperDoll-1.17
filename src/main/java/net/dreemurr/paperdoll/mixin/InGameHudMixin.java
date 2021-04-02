@@ -26,6 +26,9 @@ import static net.minecraft.client.gui.screen.ingame.HandledScreen.BACKGROUND_TE
 @Mixin(InGameHud.class)
 public class InGameHudMixin extends DrawableHelper {
 
+    //activity time
+    private static long lastActivityTime;
+
     @Shadow @Final private MinecraftClient client;
 
     @Inject(method="render", at=@At("RETURN"))
@@ -36,20 +39,30 @@ public class InGameHudMixin extends DrawableHelper {
             return;
         }
 
+        //not the player
         ClientPlayerEntity player = this.client.player;
         if(player == null) {
             return;
         }
 
-        firstperson: {
-            if ((PaperDoll.fponly && !MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) || player.isSleeping())
-                break firstperson;
+        //not render if first person only or player is sleeping
+        if ((PaperDoll.fponly && !MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) || player.isSleeping())
+            return;
 
-            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-            RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            drawEntity((15 + PaperDoll.x) * PaperDoll.scale, (60 + PaperDoll.y) * PaperDoll.scale, 30 * PaperDoll.scale, PaperDoll.rotation, player);
+        //check if should stay always on
+        if (!PaperDoll.alwayson) {
+            //if action - reset activity time and enable can draw
+            if (player.isSprinting() || player.isSneaking() || player.isUsingRiptide() || player.isInSwimmingPose() || player.isFallFlying() || player.isBlocking() || player.isClimbing() || player.getAbilities().flying)
+                lastActivityTime = System.currentTimeMillis();
+            //if activity time is greater than duration - return
+            else if(System.currentTimeMillis() - lastActivityTime > PaperDoll.delay) return;
         }
+
+        //draw
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        drawEntity((int)((15 + PaperDoll.x) * PaperDoll.scale), (int)((60 + PaperDoll.y) * PaperDoll.scale), (int)(30 * PaperDoll.scale), PaperDoll.rotation, player);
     }
 
     private static void drawEntity(int x, int y, int size, float mouseX, LivingEntity entity) {
@@ -62,6 +75,8 @@ public class InGameHudMixin extends DrawableHelper {
         matrixStack2.translate(0.0D, 0.0D, 1000.0D);
         matrixStack2.scale((float)size, (float)size, (float)size);
         Quaternion quaternion = Vec3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
+        Quaternion quaternion2 = Vec3f.POSITIVE_X.getDegreesQuaternion(0.01F);
+        quaternion.hamiltonProduct(quaternion2);
         matrixStack2.multiply(quaternion);
         float h = entity.bodyYaw;
         float l = entity.headYaw;
@@ -100,8 +115,8 @@ public class InGameHudMixin extends DrawableHelper {
 
         DiffuseLighting.method_34742();
         EntityRenderDispatcher entityRenderDispatcher = MinecraftClient.getInstance().getEntityRenderDispatcher();
-        quaternion.conjugate();
-        entityRenderDispatcher.setRotation(quaternion);
+        quaternion2.conjugate();
+        entityRenderDispatcher.setRotation(quaternion2);
         entityRenderDispatcher.setRenderShadows(false);
         VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
 
