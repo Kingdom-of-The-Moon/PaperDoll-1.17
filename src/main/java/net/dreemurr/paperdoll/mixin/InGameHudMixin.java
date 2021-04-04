@@ -52,7 +52,7 @@ public class InGameHudMixin extends DrawableHelper {
         //check if should stay always on
         if (!PaperDoll.alwayson) {
             //if action - reset activity time and enable can draw
-            if (player.isSprinting() || player.isSneaking() || player.isUsingRiptide() || player.isInSwimmingPose() || player.isFallFlying() || player.isBlocking() || player.isClimbing() || player.getAbilities().flying)
+            if (player.isSprinting() || player.isInSneakingPose() || player.isUsingRiptide() || player.isInSwimmingPose() || player.isFallFlying() || player.isBlocking() || player.isClimbing() || player.getAbilities().flying)
                 lastActivityTime = System.currentTimeMillis();
             //if activity time is greater than duration - return
             else if(System.currentTimeMillis() - lastActivityTime > PaperDoll.delay) return;
