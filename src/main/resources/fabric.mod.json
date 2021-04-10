@@ -15,6 +15,7 @@
   },
 
   "license": "MIT",
+  "icon": "assets/paperdoll/icon.png",
 
   "environment": "client",
   "entrypoints": {
@@ -27,6 +28,8 @@
     "paperdoll.mixins.json"
   ],
 
-  "depends": {},
+  "depends": {
+    "minecraft": ">=1.17-"
+  },
   "suggests": {}
 }
