@@ -3,9 +3,12 @@
   "minVersion": "0.8",
   "package": "net.dreemurr.paperdoll.mixin",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [],
+  "mixins": [
+  ],
   "client": [
-    "InGameHudMixin"
+    "LivingEntityRendererMixin",
+    "InGameHudMixin",
+    "SkinOptionsScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

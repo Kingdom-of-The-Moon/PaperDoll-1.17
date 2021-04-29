@@ -1,7 +1,7 @@
 package net.dreemurr.paperdoll.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.dreemurr.paperdoll.PaperDoll;
+import net.dreemurr.paperdoll.Config;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -43,18 +43,18 @@ public class InGameHudMixin extends DrawableHelper {
 
         ClientPlayerEntity player = this.client.player;
         //if no player found or is sleeping or is not in first person when fp only
-        if (player == null || (PaperDoll.fponly && !MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) || player.isSleeping()) {
+        if (player == null || ((boolean) Config.entries.get("fponly").value && !MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) || player.isSleeping()) {
             return;
         }
 
         //check if should stay always on
-        if (!PaperDoll.alwayson) {
+        if (!(boolean) Config.entries.get("alwayson").value) {
             //if action - reset activity time and enable can draw
             if (player.isSprinting() || player.isInSneakingPose() || player.isUsingRiptide() || player.isInSwimmingPose() || player.isFallFlying() || player.isBlocking() || player.isClimbing() || player.getAbilities().flying) {
                 lastActivityTime = System.currentTimeMillis();
             }
             //if activity time is greater than duration - return
-            else if(System.currentTimeMillis() - lastActivityTime > PaperDoll.delay) return;
+            else if(System.currentTimeMillis() - lastActivityTime > (long) Config.entries.get("delay").value) return;
         }
 
         //store stuff
@@ -65,7 +65,7 @@ public class InGameHudMixin extends DrawableHelper {
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        drawEntity((int) ((15 + PaperDoll.x) * PaperDoll.scale), (int) ((60 + PaperDoll.y) * PaperDoll.scale), (int) (30 * PaperDoll.scale), PaperDoll.rotation, player);
+        drawEntity(15 + (int) Config.entries.get("x").value, 60 + (int) Config.entries.get("y").value, (int) (30 * (float) Config.entries.get("scale").value), (int) Config.entries.get("rotation").value, player);
     }
 
     private static void drawEntity(int x, int y, int size, float mouseX, LivingEntity entity) {
@@ -83,13 +83,13 @@ public class InGameHudMixin extends DrawableHelper {
         matrixStack2.multiply(quaternion);
         float h = entity.bodyYaw;
         float l = entity.headYaw;
-        float k = entity.pitch;
+        float k = entity.method_36455(); //get pitch
 
         //player offset and pitch
         double o = 0.0D;
         if (entity.isUsingRiptide() || entity.isInSwimmingPose() || entity.isFallFlying()) {
             o = 1.0D;
-            entity.pitch = 0;
+            entity.method_36457(0); //set pitch
         }
         else if (entity.hasVehicle())
             o = 0.05D;
@@ -124,7 +124,7 @@ public class InGameHudMixin extends DrawableHelper {
         VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
 
         //render
-        int box = (int) (PaperDoll.bounds * guiScale * PaperDoll.scale);
+        int box = (int) ((int) Config.entries.get("bounds").value * guiScale * (float) Config.entries.get("scale").value);
         RenderSystem.enableScissor(x * guiScale - box / 2, screenHeight - y * guiScale - box / 2 + 30 * guiScale, box, box);
         RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(entity, 0.0D, offset, 0.0D, 0.0F, 1.0F, matrixStack2, immediate, 15728880));
         RenderSystem.disableScissor();
@@ -133,7 +133,7 @@ public class InGameHudMixin extends DrawableHelper {
         entityRenderDispatcher.setRenderShadows(true);
         entity.bodyYaw = h;
         entity.headYaw = l;
-        entity.pitch = k;
+        entity.method_36457(k); //set pitch
         matrixStack.pop();
         RenderSystem.applyModelViewMatrix();
         DiffuseLighting.enableGuiDepthLighting();

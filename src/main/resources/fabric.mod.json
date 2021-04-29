@@ -21,6 +21,9 @@
   "entrypoints": {
     "client": [
       "net.dreemurr.paperdoll.PaperDoll"
+    ],
+    "modmenu": [
+      "net.dreemurr.paperdoll.ConfigModMenu"
     ]
   },
 

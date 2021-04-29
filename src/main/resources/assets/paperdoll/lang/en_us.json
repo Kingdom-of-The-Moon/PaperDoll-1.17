@@ -1,0 +1,36 @@
+{
+  "paperdoll.menu.button": "Paper Doll...",
+  "paperdoll.menu.title": "Paper Doll Config Menu",
+
+  "paperdoll.menu.config.position": "Position",
+  "paperdoll.menu.config.properties": "Properties",
+  "paperdoll.menu.config.extra": "Extra",
+
+  "paperdoll.menu.config.x": "X Offset",
+  "paperdoll.menu.config.x.tooltip": "Horizontal offset that the paperdoll should render",
+
+  "paperdoll.menu.config.y": "Y Offset",
+  "paperdoll.menu.config.y.tooltip": "Vertical offset that the paperdoll should render",
+
+  "paperdoll.menu.config.scale": "Scale",
+  "paperdoll.menu.config.scale.tooltip": "Paperdoll scale",
+
+  "paperdoll.menu.config.rotation": "Rotation",
+  "paperdoll.menu.config.rotation.tooltip": "Paperdoll rotation",
+
+  "paperdoll.menu.config.fpOnly": "First Person Only",
+  "paperdoll.menu.config.fpOnly.tooltip": "Render only when in First Person",
+
+  "paperdoll.menu.config.alwaysOn": "Always ON",
+  "paperdoll.menu.config.alwaysOn.tooltip": "Render ALWAYS instead of only when doing special actions",
+
+  "paperdoll.menu.config.delay": "Hide Delay",
+  "paperdoll.menu.config.delay.tooltip": "Delay to hide the paperdoll when rendering set to only special actions",
+
+  "paperdoll.menu.config.bounds": "Bounds Size",
+  "paperdoll.menu.config.bounds.tooltip": "Size of the paperdoll rendering \"box\"",
+
+  "paperdoll.menu.config.nametag": "Render own nametag",
+  "paperdoll.menu.config.nametag.tooltip": "Render your own nametag"
+
+}
