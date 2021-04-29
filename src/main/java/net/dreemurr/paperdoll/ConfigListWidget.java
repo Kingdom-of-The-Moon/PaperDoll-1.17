@@ -26,7 +26,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
     //text types
     public final Predicate<String> ANY = s -> true;
     public final Predicate<String> INT = s -> s.matches("^[0-9]*$");
-    public final Predicate<String> FLOAT = s -> s.matches("[-+]?([0-9]*\\.[0-9]+|[0-9]+)") || s.endsWith(".") || s.isEmpty();
+    public final Predicate<String> FLOAT = s -> s.matches("[0-9]*\\.[0-9]+|[0-9]+") || s.endsWith(".") || s.isEmpty();
 
     public ConfigListWidget(ConfigScreen parent, MinecraftClient client) {
         super(client, parent.width + 45, parent.height, 43, parent.height - 32, 20);
