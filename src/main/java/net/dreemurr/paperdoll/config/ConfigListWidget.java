@@ -1,6 +1,6 @@
-package net.dreemurr.paperdoll;
+package net.dreemurr.paperdoll.config;
 
-import net.dreemurr.paperdoll.Config.ConfigEntry;
+import net.dreemurr.paperdoll.config.Config.ConfigEntry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Element;

@@ -1,6 +1,6 @@
 package net.dreemurr.paperdoll.mixin;
 
-import net.dreemurr.paperdoll.ConfigScreen;
+import net.dreemurr.paperdoll.config.ConfigScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

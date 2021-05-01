@@ -1,4 +1,4 @@
-package net.dreemurr.paperdoll;
+package net.dreemurr.paperdoll.config;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;

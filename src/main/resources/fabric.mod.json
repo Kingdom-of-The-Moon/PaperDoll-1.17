@@ -23,7 +23,7 @@
       "net.dreemurr.paperdoll.PaperDoll"
     ],
     "modmenu": [
-      "net.dreemurr.paperdoll.ConfigModMenu"
+      "net.dreemurr.paperdoll.config.ConfigModMenu"
     ]
   },
 

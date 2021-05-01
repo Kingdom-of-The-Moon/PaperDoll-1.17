@@ -1,6 +1,6 @@
 package net.dreemurr.paperdoll.mixin;
 
-import net.dreemurr.paperdoll.Config;
+import net.dreemurr.paperdoll.config.Config;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;

@@ -1,4 +1,4 @@
-package net.dreemurr.paperdoll;
+package net.dreemurr.paperdoll.config;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.Screen;

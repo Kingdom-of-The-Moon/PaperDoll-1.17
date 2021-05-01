@@ -1,7 +1,7 @@
 package net.dreemurr.paperdoll.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.dreemurr.paperdoll.Config;
+import net.dreemurr.paperdoll.config.Config;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;

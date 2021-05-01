@@ -1,11 +1,9 @@
-package net.dreemurr.paperdoll;
+package net.dreemurr.paperdoll.config;
 
+import net.dreemurr.paperdoll.PaperDoll;
 import net.fabricmc.loader.api.FabricLoader;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,38 +62,9 @@ public class Config {
         try {
             FileWriter writer = new FileWriter(file);
 
-            writer.write("### Horizontal offset that the paperdoll should render ### - default 20\n");
-            writer.write("x=" + entries.get("x").value + "\n\n");
-
-            writer.write("### Vertical offset that the paperdoll should render ### - default 20\n");
-            writer.write("y=" + entries.get("y").value + "\n\n");
-
-            writer.write("### Paperdoll scale ### - default 1.0\n");
-            writer.write("scale=" + entries.get("scale").value + "\n\n");
-
-            writer.write("### Paperdoll rotation ### - default 20\n");
-            writer.write("rotation=" + entries.get("rotation").value + "\n\n");
-
-            writer.write("### Render only when in First Person ### - default false\n");
-            writer.write("fponly=" + entries.get("fponly").value + "\n\n");
-
-            writer.write("### Render ALWAYS instead of only when doing special actions ### - default false\n");
-            writer.write("alwayson=" + entries.get("alwayson").value + "\n\n");
-
-            writer.write("### Delay to hide the paperdoll when rendering set to only special actions ### - default 1000\n");
-            writer.write("delay=" + entries.get("delay").value + "\n\n");
-
-            writer.write("### Size of the paperdoll rendering \"box\" ### - default 150\n");
-            writer.write("bounds=" + entries.get("bounds").value + "\n\n");
-
-            writer.write("### Render your own nametag ### - default false\n");
-            writer.write("nametag=" + entries.get("nametag").value + "\n\n");
-
-            writer.write("### Render the paperdoll when the debug screen is open ### - default false\n");
-            writer.write("debugRender=" + entries.get("debugRender").value + "\n\n");
-
-            writer.write("### Fix elytra vertical offset ### - default true\n");
-            writer.write("elytraOffset=" + entries.get("elytraOffset").value);
+            for (Map.Entry<String, ConfigEntry> entry : entries.entrySet()) {
+                writer.write(entry.getKey() + "=" + entry.getValue().value + "\n");
+            }
 
             writer.close();
         }
