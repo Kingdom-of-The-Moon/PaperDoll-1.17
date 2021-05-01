@@ -3,7 +3,10 @@ package net.dreemurr.paperdoll.config;
 import net.dreemurr.paperdoll.PaperDoll;
 import net.fabricmc.loader.api.FabricLoader;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 

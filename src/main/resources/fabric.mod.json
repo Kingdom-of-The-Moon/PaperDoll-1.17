@@ -9,8 +9,8 @@
     "Francy-Chan"
   ],
   "contact": {
-    "homepage": "https://github.com/Francy-chan/PaperDoll-1.17",
-    "sources": "https://github.com/Francy-chan/PaperDoll-1.17",
+    "homepage": "https://github.com/Francy-chan/PaperDoll-1.17/tree/1.16",
+    "sources": "https://github.com/Francy-chan/PaperDoll-1.17/tree/1.16",
     "issues": "https://github.com/Francy-chan/PaperDoll-1.17/issues"
   },
 
@@ -32,7 +32,7 @@
   ],
 
   "depends": {
-    "minecraft": ">=1.17-"
+    "minecraft": "1.16.x"
   },
   "suggests": {}
 }

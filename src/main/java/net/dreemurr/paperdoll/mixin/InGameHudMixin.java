@@ -6,22 +6,18 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.Quaternion;
-import net.minecraft.util.math.Vec3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import static net.minecraft.client.gui.screen.ingame.HandledScreen.BACKGROUND_TEXTURE;
 
 @Mixin(InGameHud.class)
 public class InGameHudMixin extends DrawableHelper {
@@ -52,7 +48,7 @@ public class InGameHudMixin extends DrawableHelper {
         //check if should stay always on
         if (!(boolean) Config.entries.get("alwayson").value) {
             //if action - reset activity time and enable can draw
-            if (player.isSprinting() || player.isInSneakingPose() || player.isUsingRiptide() || player.isInSwimmingPose() || player.isFallFlying() || player.isBlocking() || player.isClimbing() || player.getAbilities().flying) {
+            if (player.isSprinting() || player.isInSneakingPose() || player.isUsingRiptide() || player.isInSwimmingPose() || player.isFallFlying() || player.isBlocking() || player.isClimbing() || !player.canFly()) {
                 lastActivityTime = System.currentTimeMillis();
             }
             //if activity time is greater than duration - return
@@ -64,28 +60,23 @@ public class InGameHudMixin extends DrawableHelper {
         screenHeight = this.client.getWindow().getHeight();
 
         //draw
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         drawEntity(15 + (int) Config.entries.get("x").value, 60 + (int) Config.entries.get("y").value, (int) (30 * (float) Config.entries.get("scale").value), (int) Config.entries.get("rotation").value, player);
     }
 
     private static void drawEntity(int x, int y, int size, float mouseX, LivingEntity entity) {
-        MatrixStack matrixStack = RenderSystem.getModelViewStack();
-        matrixStack.push();
-        matrixStack.translate(x, y, 1050.0D);
-        matrixStack.scale(1.0F, 1.0F, -1.0F);
-        RenderSystem.applyModelViewMatrix();
-        MatrixStack matrixStack2 = new MatrixStack();
-        matrixStack2.translate(0.0D, 0.0D, 1000.0D);
-        matrixStack2.scale((float)size, (float)size, (float)size);
-        Quaternion quaternion = Vec3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
-        Quaternion quaternion2 = Vec3f.POSITIVE_X.getDegreesQuaternion(0.01F);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float) x, (float) y, 1050.0F);
+        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
+        MatrixStack matrixStack = new MatrixStack();
+        matrixStack.translate(0.0D, 0.0D, 1000.0D);
+        matrixStack.scale((float) size, (float) size, (float) size);
+        Quaternion quaternion = Vector3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
+        Quaternion quaternion2 = Vector3f.POSITIVE_X.getDegreesQuaternion(0.01F);
         quaternion.hamiltonProduct(quaternion2);
-        matrixStack2.multiply(quaternion);
+        matrixStack.multiply(quaternion);
         float h = entity.bodyYaw;
         float l = entity.headYaw;
-        float k = entity.method_36455(); //get pitch
+        float k = entity.pitch; //get pitch
 
         //convert to positive numbers
         if (entity.bodyYaw < 0) {
@@ -106,7 +97,7 @@ public class InGameHudMixin extends DrawableHelper {
 
         if (entity.isUsingRiptide() || entity.isInSwimmingPose() || entity.isFallFlying()) {
             yOff = 1.0D;
-            entity.method_36457(0); //set pitch
+            entity.pitch = 0; //set pitch
         }
         else if (entity.hasVehicle()) {
             yOff = 0.05D;
@@ -126,7 +117,7 @@ public class InGameHudMixin extends DrawableHelper {
                 xOff = -1 + ((rotation - 270) / 90.0);
         }
 
-        matrixStack2.translate(xOff, yOff, 0.0D);
+        matrixStack.translate(xOff, yOff, 0.0D);
 
         //body to front difference
         float d = entity.bodyYaw - 180.0F;
@@ -135,7 +126,6 @@ public class InGameHudMixin extends DrawableHelper {
         entity.bodyYaw -= d + mouseX;
         entity.headYaw -= d + mouseX;
 
-        DiffuseLighting.method_34742();
         EntityRenderDispatcher entityRenderDispatcher = MinecraftClient.getInstance().getEntityRenderDispatcher();
         quaternion2.conjugate();
         entityRenderDispatcher.setRotation(quaternion2);
@@ -145,16 +135,14 @@ public class InGameHudMixin extends DrawableHelper {
         //render
         int box = (int) ((int) Config.entries.get("bounds").value * guiScale * (float) Config.entries.get("scale").value);
         RenderSystem.enableScissor(x * guiScale - box / 2, screenHeight - y * guiScale - box / 2 + 30 * guiScale, box, box);
-        RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixStack2, immediate, 15728880));
+        RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixStack, immediate, 15728880));
         RenderSystem.disableScissor();
 
         immediate.draw();
         entityRenderDispatcher.setRenderShadows(true);
         entity.bodyYaw = h;
         entity.headYaw = l;
-        entity.method_36457(k); //set pitch
-        matrixStack.pop();
-        RenderSystem.applyModelViewMatrix();
-        DiffuseLighting.enableGuiDepthLighting();
+        entity.pitch = k; //set pitch
+        RenderSystem.popMatrix();
     }
 }

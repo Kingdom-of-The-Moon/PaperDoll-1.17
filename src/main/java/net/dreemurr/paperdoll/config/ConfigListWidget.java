@@ -165,6 +165,8 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
             }
         }
 
+
+        @Override
         public List<? extends Element> children() {
             return Arrays.asList(this.toggle, this.reset);
         }
