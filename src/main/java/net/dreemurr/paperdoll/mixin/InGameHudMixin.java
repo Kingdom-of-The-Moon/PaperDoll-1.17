@@ -36,16 +36,18 @@ public class InGameHudMixin extends DrawableHelper {
     @Inject(method="render", at=@At("RETURN"))
     public void render(MatrixStack matrices, float f, CallbackInfo ci) {
 
-        //dont draw if the F3 screen is open or if hud is hidden
-        if (this.client.options.debugEnabled || this.client.options.hudHidden) {
+        //if hud is hidden
+        if (this.client.options.hudHidden)
             return;
-        }
+
+        //F3 screen check
+        if (this.client.options.debugEnabled && !(boolean) Config.entries.get("debugRender").value)
+            return;
 
         ClientPlayerEntity player = this.client.player;
         //if no player found or is sleeping or is not in first person when fp only
-        if (player == null || ((boolean) Config.entries.get("fponly").value && !MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) || player.isSleeping()) {
+        if (player == null || ((boolean) Config.entries.get("fponly").value && !MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) || player.isSleeping())
             return;
-        }
 
         //check if should stay always on
         if (!(boolean) Config.entries.get("alwayson").value) {
@@ -85,17 +87,6 @@ public class InGameHudMixin extends DrawableHelper {
         float l = entity.headYaw;
         float k = entity.method_36455(); //get pitch
 
-        //player offset and pitch
-        double o = 0.0D;
-        if (entity.isUsingRiptide() || entity.isInSwimmingPose() || entity.isFallFlying()) {
-            o = 1.0D;
-            entity.method_36457(0); //set pitch
-        }
-        else if (entity.hasVehicle())
-            o = 0.05D;
-
-        final double offset = o;
-
         //convert to positive numbers
         if (entity.bodyYaw < 0) {
             entity.bodyYaw %= -360;
@@ -109,7 +100,35 @@ public class InGameHudMixin extends DrawableHelper {
         entity.bodyYaw %= 360;
         entity.headYaw %= 360;
 
-        //body and foward difference
+        //offset and pitch
+        double xOff = 0.0D;
+        double yOff = 0.0D;
+
+        if (entity.isUsingRiptide() || entity.isInSwimmingPose() || entity.isFallFlying()) {
+            yOff = 1.0D;
+            entity.method_36457(0); //set pitch
+        }
+        else if (entity.hasVehicle()) {
+            yOff = 0.05D;
+        }
+
+        if (entity.isFallFlying() && (boolean) Config.entries.get("elytraOffset").value) {
+            int rotation = (int) (mouseX % 360);
+            if (rotation < 0) rotation += 360;
+
+            if (rotation >= 0 && rotation <= 90)
+                xOff = rotation / 90.0;
+            else if (rotation > 90 && rotation <= 180)
+                xOff = 1 - ((rotation - 90) / 90.0);
+            else if (rotation > 180 && rotation <= 270)
+                xOff = -((rotation - 180) / 90.0);
+            else
+                xOff = -1 + ((rotation - 270) / 90.0);
+        }
+
+        matrixStack2.translate(xOff, yOff, 0.0D);
+
+        //body to front difference
         float d = entity.bodyYaw - 180.0F;
 
         //apply to both head and body
@@ -126,7 +145,7 @@ public class InGameHudMixin extends DrawableHelper {
         //render
         int box = (int) ((int) Config.entries.get("bounds").value * guiScale * (float) Config.entries.get("scale").value);
         RenderSystem.enableScissor(x * guiScale - box / 2, screenHeight - y * guiScale - box / 2 + 30 * guiScale, box, box);
-        RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(entity, 0.0D, offset, 0.0D, 0.0F, 1.0F, matrixStack2, immediate, 15728880));
+        RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixStack2, immediate, 15728880));
         RenderSystem.disableScissor();
 
         immediate.draw();

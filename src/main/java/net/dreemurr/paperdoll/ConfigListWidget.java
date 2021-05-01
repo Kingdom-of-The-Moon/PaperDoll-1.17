@@ -1,6 +1,5 @@
 package net.dreemurr.paperdoll;
 
-import com.google.common.collect.ImmutableList;
 import net.dreemurr.paperdoll.Config.ConfigEntry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -14,6 +13,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -24,9 +24,9 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
     private final ConfigScreen parent;
 
     //text types
-    public final Predicate<String> ANY = s -> true;
-    public final Predicate<String> INT = s -> s.matches("^[0-9]*$");
-    public final Predicate<String> FLOAT = s -> s.matches("[0-9]*\\.[0-9]+|[0-9]+") || s.endsWith(".") || s.isEmpty();
+    public static final Predicate<String> ANY = s -> true;
+    public static final Predicate<String> INT = s -> s.matches("^[\\-+]?[0-9]*$");
+    public static final Predicate<String> FLOAT = s -> s.matches("[\\-+]?[0-9]*(\\.[0-9]+)?") || s.endsWith(".") || s.isEmpty();
 
     public ConfigListWidget(ConfigScreen parent, MinecraftClient client) {
         super(client, parent.width + 45, parent.height, 43, parent.height - 32, 20);
@@ -40,6 +40,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         this.addEntry(new ConfigListWidget.InputEntry(new TranslatableText("paperdoll.menu.config.y"), new TranslatableText("paperdoll.menu.config.y.tooltip"), Config.entries.get("y"), INT));
         this.addEntry(new ConfigListWidget.InputEntry(new TranslatableText("paperdoll.menu.config.scale"), new TranslatableText("paperdoll.menu.config.scale.tooltip"), Config.entries.get("scale"), FLOAT));
         this.addEntry(new ConfigListWidget.InputEntry(new TranslatableText("paperdoll.menu.config.rotation"), new TranslatableText("paperdoll.menu.config.rotation.tooltip"), Config.entries.get("rotation"), INT));
+        this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.elytraOffset"), new TranslatableText("paperdoll.menu.config.elytraOffset.tooltip"), Config.entries.get("elytraOffset")));
 
         //category
         this.addEntry(new ConfigListWidget.CategoryEntry(new TranslatableText("paperdoll.menu.config.properties")));
@@ -49,6 +50,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.alwaysOn"), new TranslatableText("paperdoll.menu.config.alwaysOn.tooltip"), Config.entries.get("alwayson")));
         this.addEntry(new ConfigListWidget.InputEntry(new TranslatableText("paperdoll.menu.config.delay"), new TranslatableText("paperdoll.menu.config.delay.tooltip"), Config.entries.get("delay"), INT));
         this.addEntry(new ConfigListWidget.InputEntry(new TranslatableText("paperdoll.menu.config.bounds"), new TranslatableText("paperdoll.menu.config.bounds.tooltip"), Config.entries.get("bounds"), INT));
+        this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.debugRender"), new TranslatableText("paperdoll.menu.config.debugRender.tooltip"), Config.entries.get("debugRender")));
 
         //category
         this.addEntry(new ConfigListWidget.CategoryEntry(new TranslatableText("paperdoll.menu.config.extra")));
@@ -164,7 +166,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         }
 
         public List<? extends Element> children() {
-            return ImmutableList.of(this.toggle, this.reset);
+            return Arrays.asList(this.toggle, this.reset);
         }
 
         @Override
@@ -196,7 +198,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
             this.display = display;
             this.tooltip = tooltip;
             this.config = config;
-            this.initValue = config.value % states.size();
+            this.initValue = config.value;
             this.states = states;
 
             //toggle button
@@ -239,7 +241,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         }
 
         public List<? extends Element> children() {
-            return ImmutableList.of(this.toggle, this.reset);
+            return Arrays.asList(this.toggle, this.reset);
         }
 
         @Override
@@ -302,8 +304,14 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
             this.field.y = y + 2;
 
             //if setting is changed
-            if (!this.config.configValue.equals(this.initValue + ""))
-                this.field.setEditableColor(Formatting.AQUA.getColorValue());
+            if (!this.config.configValue.equals(this.initValue + "")) {
+                try {
+                    this.config.defaultValue.getClass().getConstructor(new Class[] {String.class }).newInstance(this.config.configValue);
+                    this.field.setEditableColor(Formatting.AQUA.getColorValue());
+                } catch (Exception e) {
+                    this.field.setEditableColor(Formatting.RED.getColorValue());
+                }
+            }
             else
                 this.field.setEditableColor(Formatting.WHITE.getColorValue());
 
@@ -319,7 +327,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         }
 
         public List<? extends Element> children() {
-            return ImmutableList.of(this.field, this.reset);
+            return Arrays.asList(this.field, this.reset);
         }
 
         @Override

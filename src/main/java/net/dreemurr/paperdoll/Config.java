@@ -30,8 +30,22 @@ public class Config {
                     String[] content = line.split("=");
 
                     if (content.length >= 2 && line.charAt(0) != '#') {
-                        if (entries.containsKey(content[0]))
-                            entries.get(content[0]).setValue(content[1]);
+                        if (entries.containsKey(content[0])) {
+
+                            ConfigEntry entry = entries.get(content[0]);
+                            try {
+                                if (entry.modValue != null) {
+                                    int value = Integer.parseInt(content[1]) % (int) entry.modValue;
+                                    if (value < 0) value += (int) entry.modValue;
+
+                                    entry.setValue(String.valueOf(value));
+                                } else {
+                                    entry.setValue(content[1]);
+                                }
+                            } catch (Exception e) {
+                                entry.value = entry.defaultValue;
+                            }
+                        }
                     }
                     line = br.readLine();
                 }
@@ -75,7 +89,13 @@ public class Config {
             writer.write("bounds=" + entries.get("bounds").value + "\n\n");
 
             writer.write("### Render your own nametag ### - default false\n");
-            writer.write("nametag=" + entries.get("nametag").value);
+            writer.write("nametag=" + entries.get("nametag").value + "\n\n");
+
+            writer.write("### Render the paperdoll when the debug screen is open ### - default false\n");
+            writer.write("debugRender=" + entries.get("debugRender").value + "\n\n");
+
+            writer.write("### Fix elytra vertical offset ### - default true\n");
+            writer.write("elytraOffset=" + entries.get("elytraOffset").value);
 
             writer.close();
         }
@@ -104,21 +124,25 @@ public class Config {
         entries.put("delay", new ConfigEntry<>(1000L));
         entries.put("bounds", new ConfigEntry<>(150));
         entries.put("nametag", new ConfigEntry<>(false));
+        entries.put("debugRender", new ConfigEntry<>(false));
+        entries.put("elytraOffset", new ConfigEntry<>(true));
     }
 
     public static class ConfigEntry<T> {
         public T value;
         public T defaultValue;
         public T configValue;
-
-        public ConfigEntry(T value, T defaultValue) {
-            this.value = value;
-            this.defaultValue = defaultValue;
-            this.configValue = value;
-        }
+        public T modValue;
 
         public ConfigEntry(T value) {
-            this(value, value);
+            this(value, null);
+        }
+
+        public ConfigEntry(T value, T modValue) {
+            this.value = value;
+            this.defaultValue = value;
+            this.configValue = value;
+            this.modValue = modValue;
         }
 
         @SuppressWarnings("unchecked")

@@ -31,6 +31,11 @@
   "paperdoll.menu.config.bounds.tooltip": "Size of the paperdoll rendering \"box\"",
 
   "paperdoll.menu.config.nametag": "Render own nametag",
-  "paperdoll.menu.config.nametag.tooltip": "Render your own nametag"
+  "paperdoll.menu.config.nametag.tooltip": "Render your own nametag",
 
+  "paperdoll.menu.config.debugRender": "Render in Debug Screen",
+  "paperdoll.menu.config.debugRender.tooltip": "Render the paperdoll when the debug screen is open",
+
+  "paperdoll.menu.config.elytraOffset": "Fix Elytra Offset",
+  "paperdoll.menu.config.elytraOffset.tooltip": "Fix elytra vertical offset"
 }
