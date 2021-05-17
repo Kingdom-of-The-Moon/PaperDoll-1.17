@@ -37,5 +37,8 @@
   "paperdoll.menu.config.debugRender.tooltip": "Render the paperdoll when the debug screen is open",
 
   "paperdoll.menu.config.elytraOffset": "Fix Elytra Offset",
-  "paperdoll.menu.config.elytraOffset.tooltip": "Fix elytra vertical offset"
+  "paperdoll.menu.config.elytraOffset.tooltip": "Fix elytra vertical offset",
+
+  "paperdoll.menu.config.enablemod": "Enable Paperdoll",
+  "paperdoll.menu.config.enablemod.tooltip": "Enable/Disable the entire mod"
 }

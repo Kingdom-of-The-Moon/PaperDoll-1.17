@@ -32,8 +32,8 @@ public class InGameHudMixin extends DrawableHelper {
     @Inject(method="render", at=@At("RETURN"))
     public void render(MatrixStack matrices, float f, CallbackInfo ci) {
 
-        //if hud is hidden
-        if (this.client.options.hudHidden)
+        //if hud is hidden or mod is disabled
+        if (this.client.options.hudHidden || !(boolean) Config.entries.get("enablemod").value)
             return;
 
         //F3 screen check

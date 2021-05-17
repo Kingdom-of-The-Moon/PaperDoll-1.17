@@ -57,6 +57,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
 
         //entries
         this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.nametag"), new TranslatableText("paperdoll.menu.config.nametag.tooltip"), Config.entries.get("nametag")));
+        this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.enablemod"), new TranslatableText("paperdoll.menu.config.enablemod.tooltip"), Config.entries.get("enablemod")));
     }
 
     @Override

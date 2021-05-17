@@ -15,7 +15,7 @@ import java.util.Map;
 public class Config {
     public static final Map<String, ConfigEntry> entries = new HashMap<>();
 
-    private static final File file = new File(FabricLoader.getInstance().getConfigDir().resolve("paperdoll.properties").toString());
+    private static final File file = new File(FabricLoader.getInstance().getConfigDir().resolve("paperdoll.json").toString());
 
     public static void initialize() {
         setDefaults();
@@ -104,6 +104,7 @@ public class Config {
         entries.put("nametag", new ConfigEntry<>(false));
         entries.put("debugRender", new ConfigEntry<>(false));
         entries.put("elytraOffset", new ConfigEntry<>(true));
+        entries.put("enablemod", new ConfigEntry<>(true));
     }
 
     public static class ConfigEntry<T> {
