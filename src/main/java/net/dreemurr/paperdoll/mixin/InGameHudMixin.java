@@ -63,7 +63,7 @@ public class InGameHudMixin extends DrawableHelper {
         drawEntity(15 + (int) Config.entries.get("x").value, 60 + (int) Config.entries.get("y").value, (int) (30 * (float) Config.entries.get("scale").value), (int) Config.entries.get("rotation").value, player);
     }
 
-    private static void drawEntity(int x, int y, int size, float mouseX, LivingEntity entity) {
+    private static void drawEntity(int x, int y, int size, float rotation, LivingEntity entity) {
         RenderSystem.pushMatrix();
         RenderSystem.translatef((float) x, (float) y, 1050.0F);
         RenderSystem.scalef(1.0F, 1.0F, -1.0F);
@@ -78,18 +78,9 @@ public class InGameHudMixin extends DrawableHelper {
         float l = entity.headYaw;
         float k = entity.pitch; //get pitch
 
-        //convert to positive numbers
-        if (entity.bodyYaw < 0) {
-            entity.bodyYaw %= -360;
-            entity.bodyYaw += 360;
-        }
-        if (entity.headYaw < 0) {
-            entity.headYaw %= -360;
-            entity.headYaw += 360;
-        }
-        //keep it in 360
-        entity.bodyYaw %= 360;
-        entity.headYaw %= 360;
+        //mod rotation
+        rotation %= 360;
+        if (rotation < 0) rotation += 360;
 
         //offset and pitch
         double xOff = 0.0D;
@@ -104,9 +95,6 @@ public class InGameHudMixin extends DrawableHelper {
         }
 
         if (entity.isFallFlying() && (boolean) Config.entries.get("elytraOffset").value) {
-            int rotation = (int) (mouseX % 360);
-            if (rotation < 0) rotation += 360;
-
             if (rotation >= 0 && rotation <= 90)
                 xOff = rotation / 90.0;
             else if (rotation > 90 && rotation <= 180)
@@ -122,9 +110,9 @@ public class InGameHudMixin extends DrawableHelper {
         //body to front difference
         float d = entity.bodyYaw - 180.0F;
 
-        //apply to both head and body
-        entity.bodyYaw -= d + mouseX;
-        entity.headYaw -= d + mouseX;
+        //rotate
+        entity.bodyYaw -= d + rotation;
+        entity.headYaw -= d + rotation;
 
         EntityRenderDispatcher entityRenderDispatcher = MinecraftClient.getInstance().getEntityRenderDispatcher();
         quaternion2.conjugate();

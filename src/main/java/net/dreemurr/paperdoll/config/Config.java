@@ -1,5 +1,7 @@
 package net.dreemurr.paperdoll.config;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.dreemurr.paperdoll.PaperDoll;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -23,37 +25,33 @@ public class Config {
 
     public static void loadConfig() {
         try {
-            if(file.exists()) {
+            if (file.exists()) {
                 BufferedReader br = new BufferedReader(new FileReader(file));
-                String line = br.readLine();
+                JsonObject json = new JsonParser().parse(br).getAsJsonObject();
 
-                while (line != null) {
-                    String[] content = line.split("=");
+                for (Map.Entry<String, ConfigEntry> entryMap : entries.entrySet()) {
+                    ConfigEntry entry = entryMap.getValue();
 
-                    if (content.length >= 2 && line.charAt(0) != '#') {
-                        if (entries.containsKey(content[0])) {
+                    try {
+                        String jsonValue = json.getAsJsonPrimitive(entryMap.getKey()).getAsString();
+                        entry.setValue(jsonValue);
 
-                            ConfigEntry entry = entries.get(content[0]);
-                            try {
-                                if (entry.modValue != null) {
-                                    int value = Integer.parseInt(content[1]) % (int) entry.modValue;
-                                    if (value < 0) value += (int) entry.modValue;
-
-                                    entry.setValue(String.valueOf(value));
-                                } else {
-                                    entry.setValue(content[1]);
-                                }
-                            } catch (Exception e) {
-                                entry.value = entry.defaultValue;
-                            }
+                        if (entry.modValue != null) {
+                            int value = Integer.parseInt(jsonValue) % (int) entry.modValue;
+                            if (value < 0) value += (int) entry.modValue;
+                            entry.setValue(String.valueOf(value));
                         }
+                        else {
+                            entry.setValue(jsonValue);
+                        }
+                    } catch (Exception e) {
+                        entry.value = entry.defaultValue;
                     }
-                    line = br.readLine();
                 }
+
                 br.close();
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             PaperDoll.LOGGER.warn("Failed to load config file! Generating a new one...");
             e.printStackTrace();
             setDefaults();
@@ -63,15 +61,23 @@ public class Config {
 
     public static void saveConfig() {
         try {
-            FileWriter writer = new FileWriter(file);
+            JsonObject config = new JsonObject();
 
             for (Map.Entry<String, ConfigEntry> entry : entries.entrySet()) {
-                writer.write(entry.getKey() + "=" + entry.getValue().value + "\n");
+                if (entry.getValue().value instanceof Number)
+                    config.addProperty(entry.getKey(), (Number) entry.getValue().value);
+                else if (entry.getValue().value instanceof Boolean)
+                    config.addProperty(entry.getKey(), (boolean) entry.getValue().value);
+                else
+                    config.addProperty(entry.getKey(), String.valueOf(entry.getValue().value));
             }
 
-            writer.close();
-        }
-        catch (Exception e) {
+            FileWriter fileWriter = new FileWriter(file);
+            String jsonString = config.toString().replaceAll(":",": ").replaceAll(",",",\n  ").replaceAll("\\{","{\n  ").replaceAll("}","\n}");
+
+            fileWriter.write(jsonString);
+            fileWriter.close();
+        } catch (Exception e) {
             PaperDoll.LOGGER.error("Failed to save config file!");
             e.printStackTrace();
         }
@@ -90,7 +96,7 @@ public class Config {
         entries.put("x", new ConfigEntry<>(20));
         entries.put("y", new ConfigEntry<>(20));
         entries.put("scale", new ConfigEntry<>(1.0F));
-        entries.put("rotation", new ConfigEntry<>(20));
+        entries.put("rotation", new ConfigEntry<>(20, 360));
         entries.put("fponly", new ConfigEntry<>(false));
         entries.put("alwayson", new ConfigEntry<>(false));
         entries.put("delay", new ConfigEntry<>(1000L));
