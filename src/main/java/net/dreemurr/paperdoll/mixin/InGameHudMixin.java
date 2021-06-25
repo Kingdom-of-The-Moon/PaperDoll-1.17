@@ -7,21 +7,18 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.Quaternion;
-import net.minecraft.util.math.Vec3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import static net.minecraft.client.gui.screen.ingame.HandledScreen.BACKGROUND_TEXTURE;
 
 @Mixin(InGameHud.class)
 public class InGameHudMixin extends DrawableHelper {
@@ -36,8 +33,8 @@ public class InGameHudMixin extends DrawableHelper {
     @Inject(method="render", at=@At("RETURN"))
     public void render(MatrixStack matrices, float f, CallbackInfo ci) {
 
-        //if hud is hidden
-        if (this.client.options.hudHidden)
+        //if hud is hidden or mod is disabled
+        if (this.client.options.hudHidden || !(boolean) Config.entries.get("enablemod").value)
             return;
 
         //F3 screen check
@@ -64,13 +61,10 @@ public class InGameHudMixin extends DrawableHelper {
         screenHeight = this.client.getWindow().getHeight();
 
         //draw
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         drawEntity(15 + (int) Config.entries.get("x").value, 60 + (int) Config.entries.get("y").value, (int) (30 * (float) Config.entries.get("scale").value), (int) Config.entries.get("rotation").value, player);
     }
 
-    private static void drawEntity(int x, int y, int size, float mouseX, LivingEntity entity) {
+    private static void drawEntity(int x, int y, int size, float rotation, LivingEntity entity) {
         MatrixStack matrixStack = RenderSystem.getModelViewStack();
         matrixStack.push();
         matrixStack.translate(x, y, 1050.0D);
@@ -78,27 +72,18 @@ public class InGameHudMixin extends DrawableHelper {
         RenderSystem.applyModelViewMatrix();
         MatrixStack matrixStack2 = new MatrixStack();
         matrixStack2.translate(0.0D, 0.0D, 1000.0D);
-        matrixStack2.scale((float)size, (float)size, (float)size);
+        matrixStack2.scale((float) size, (float) size, (float) size);
         Quaternion quaternion = Vec3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
         Quaternion quaternion2 = Vec3f.POSITIVE_X.getDegreesQuaternion(0.01F);
         quaternion.hamiltonProduct(quaternion2);
         matrixStack2.multiply(quaternion);
         float h = entity.bodyYaw;
         float l = entity.headYaw;
-        float k = entity.method_36455(); //get pitch
+        float k = entity.getPitch();
 
-        //convert to positive numbers
-        if (entity.bodyYaw < 0) {
-            entity.bodyYaw %= -360;
-            entity.bodyYaw += 360;
-        }
-        if (entity.headYaw < 0) {
-            entity.headYaw %= -360;
-            entity.headYaw += 360;
-        }
-        //keep it in 360
-        entity.bodyYaw %= 360;
-        entity.headYaw %= 360;
+        //mod rotation
+        rotation %= 360;
+        if (rotation < 0) rotation += 360;
 
         //offset and pitch
         double xOff = 0.0D;
@@ -106,16 +91,13 @@ public class InGameHudMixin extends DrawableHelper {
 
         if (entity.isUsingRiptide() || entity.isInSwimmingPose() || entity.isFallFlying()) {
             yOff = 1.0D;
-            entity.method_36457(0); //set pitch
+            entity.setPitch(0);
         }
         else if (entity.hasVehicle()) {
             yOff = 0.05D;
         }
 
         if (entity.isFallFlying() && (boolean) Config.entries.get("elytraOffset").value) {
-            int rotation = (int) (mouseX % 360);
-            if (rotation < 0) rotation += 360;
-
             if (rotation >= 0 && rotation <= 90)
                 xOff = rotation / 90.0;
             else if (rotation > 90 && rotation <= 180)
@@ -131,9 +113,9 @@ public class InGameHudMixin extends DrawableHelper {
         //body to front difference
         float d = entity.bodyYaw - 180.0F;
 
-        //apply to both head and body
-        entity.bodyYaw -= d + mouseX;
-        entity.headYaw -= d + mouseX;
+        //rotate
+        entity.bodyYaw -= d + rotation;
+        entity.headYaw -= d + rotation;
 
         DiffuseLighting.method_34742();
         EntityRenderDispatcher entityRenderDispatcher = MinecraftClient.getInstance().getEntityRenderDispatcher();
@@ -152,7 +134,7 @@ public class InGameHudMixin extends DrawableHelper {
         entityRenderDispatcher.setRenderShadows(true);
         entity.bodyYaw = h;
         entity.headYaw = l;
-        entity.method_36457(k); //set pitch
+        entity.setPitch(k); //set pitch
         matrixStack.pop();
         RenderSystem.applyModelViewMatrix();
         DiffuseLighting.enableGuiDepthLighting();

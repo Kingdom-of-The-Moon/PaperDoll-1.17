@@ -4,9 +4,12 @@ import net.dreemurr.paperdoll.config.Config.ConfigEntry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -22,6 +25,9 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
 
     //screen
     private final ConfigScreen parent;
+
+    //focused binding
+    private KeyBinding focusedBinding;
 
     //text types
     public static final Predicate<String> ANY = s -> true;
@@ -57,6 +63,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
 
         //entries
         this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.nametag"), new TranslatableText("paperdoll.menu.config.nametag.tooltip"), Config.entries.get("nametag")));
+        this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.enablemod"), new TranslatableText("paperdoll.menu.config.enablemod.tooltip"), Config.entries.get("enablemod")));
     }
 
     @Override
@@ -79,7 +86,22 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    public class CategoryEntry extends ConfigListWidget.Entry {
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (this.focusedBinding != null) {
+            this.focusedBinding.setBoundKey(keyCode == 256 ? InputUtil.UNKNOWN_KEY: InputUtil.fromKeyCode(keyCode, scanCode));
+            this.focusedBinding = null;
+
+            KeyBinding.updateKeysByCode();
+
+            return true;
+        }
+        else {
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
+    }
+
+    public class CategoryEntry extends Entry {
         //properties
         private final Text text;
 
@@ -105,9 +127,14 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         public List<? extends Element> children() {
             return Collections.emptyList();
         }
+
+        @Override
+        public List<? extends Selectable> method_37025() {
+            return Collections.emptyList();
+        }
     }
 
-    public class BooleanEntry extends ConfigListWidget.Entry {
+    public class BooleanEntry extends Entry {
         //entry
         private final ConfigEntry<Boolean> config;
 
@@ -165,7 +192,13 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
             }
         }
 
+        @Override
         public List<? extends Element> children() {
+            return Arrays.asList(this.toggle, this.reset);
+        }
+
+        @Override
+        public List<? extends Selectable> method_37025() {
             return Arrays.asList(this.toggle, this.reset);
         }
 
@@ -180,7 +213,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         }
     }
 
-    public class MultiStateEntry extends ConfigListWidget.Entry {
+    public class EnumEntry extends Entry {
         //entry
         private final ConfigEntry<Integer> config;
 
@@ -194,7 +227,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         private final ButtonWidget toggle;
         private final ButtonWidget reset;
 
-        public MultiStateEntry(Text display, Text tooltip, ConfigEntry<Integer> config, List<Text> states) {
+        public EnumEntry(Text display, Text tooltip, ConfigEntry<Integer> config, List<Text> states) {
             this.display = display;
             this.tooltip = tooltip;
             this.config = config;
@@ -240,7 +273,13 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
             }
         }
 
+        @Override
         public List<? extends Element> children() {
+            return Arrays.asList(this.toggle, this.reset);
+        }
+
+        @Override
+        public List<? extends Selectable> method_37025() {
             return Arrays.asList(this.toggle, this.reset);
         }
 
@@ -304,14 +343,13 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
             this.field.y = y + 2;
 
             //if setting is changed
-            if (!this.config.configValue.equals(this.initValue + "")) {
+            if (!this.config.configValue.equals(this.initValue + ""))
                 try {
-                    this.config.defaultValue.getClass().getConstructor(new Class[] {String.class }).newInstance(this.config.configValue);
+                    this.config.defaultValue.getClass().getConstructor(new Class[] {String.class}).newInstance(this.config.configValue);
                     this.field.setEditableColor(Formatting.AQUA.getColorValue());
                 } catch (Exception e) {
                     this.field.setEditableColor(Formatting.RED.getColorValue());
                 }
-            }
             else
                 this.field.setEditableColor(Formatting.WHITE.getColorValue());
 
@@ -326,7 +364,13 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
             }
         }
 
+        @Override
         public List<? extends Element> children() {
+            return Arrays.asList(this.field, this.reset);
+        }
+
+        @Override
+        public List<? extends Selectable> method_37025() {
             return Arrays.asList(this.field, this.reset);
         }
 
@@ -346,6 +390,96 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
 
         public boolean charTyped(char chr, int modifiers) {
             return this.field.charTyped(chr, modifiers);
+        }
+    }
+
+    public class KeyBindEntry extends Entry {
+        //entry
+        private final ConfigEntry<Integer> config;
+
+        //values
+        private final Text display;
+        private final Text tooltip;
+        private final KeyBinding binding;
+
+        //buttons
+        private final ButtonWidget toggle;
+        private final ButtonWidget reset;
+
+        public KeyBindEntry(Text display, Text tooltip, ConfigEntry<Integer> config, KeyBinding binding) {
+            this.display = display;
+            this.tooltip = tooltip;
+            this.config = config;
+            this.binding = binding;
+
+            //toggle button
+            this.toggle = new ButtonWidget(0, 0, 75, 20, this.display, (button) -> focusedBinding = binding);
+
+            //reset button
+            this.reset = new ButtonWidget(0, 0, 50, 20, new TranslatableText("controls.reset"), (button) -> {
+                binding.setBoundKey(binding.getDefaultKey());
+                KeyBinding.updateKeysByCode();
+            });
+        }
+
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+            //text
+            TextRenderer textRenderer = ConfigListWidget.this.client.textRenderer;
+            int posY = y + entryHeight / 2;
+            textRenderer.draw(matrices, this.display, (float) x, (float) (posY - 9 / 2), 16777215);
+
+            //reset button
+            this.reset.x = x + 250;
+            this.reset.y = y;
+            this.reset.active = !this.binding.isDefault();
+            this.reset.render(matrices, mouseX, mouseY, tickDelta);
+
+            //toggle button
+            this.toggle.x = x + 165;
+            this.toggle.y = y;
+            this.toggle.setMessage(this.binding.getBoundKeyLocalizedText());
+
+            if (focusedBinding == this.binding) {
+                this.toggle.setMessage((new LiteralText("> ")).append(this.toggle.getMessage().shallowCopy().formatted(Formatting.AQUA)).append(" <").formatted(Formatting.AQUA));
+            }
+            else if (!this.binding.isUnbound()) {
+                for (KeyBinding key : MinecraftClient.getInstance().options.keysAll) {
+                    if (key != this.binding && this.binding.equals(key)) {
+                        this.toggle.setMessage(this.toggle.getMessage().shallowCopy().formatted(Formatting.RED));
+                        break;
+                    }
+                }
+            }
+
+            this.toggle.render(matrices, mouseX, mouseY, tickDelta);
+
+            //overlay text
+            if (isMouseOver(mouseX, mouseY) && mouseX < x + 165) {
+                matrices.push();
+                matrices.translate(0, 0, 599);
+                parent.renderTooltip(matrices, this.tooltip, mouseX, mouseY);
+                matrices.pop();
+            }
+        }
+
+        @Override
+        public List<? extends Element> children() {
+            return Arrays.asList(this.toggle, this.reset);
+        }
+
+        @Override
+        public List<? extends Selectable> method_37025() {
+            return Arrays.asList(this.toggle, this.reset);
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            return this.toggle.mouseClicked(mouseX, mouseY, button) || this.reset.mouseClicked(mouseX, mouseY, button);
+        }
+
+        @Override
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            return this.toggle.mouseReleased(mouseX, mouseY, button) || this.reset.mouseReleased(mouseX, mouseY, button);
         }
     }
 

@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.screen.option.SkinOptionsScreen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.text.TranslatableText;
@@ -23,7 +22,7 @@ public abstract class SkinOptionsScreenMixin extends GameOptionsScreen {
 
     @Inject(method = "init()V", at = @At("TAIL"))
     public void init(CallbackInfo info) {
-        this.<AbstractButtonWidget>addButton(new ButtonWidget(
+        this.addDrawableChild(new ButtonWidget(
                 this.width - 105, this.height - 25,
                 100, 20,
                 new TranslatableText("paperdoll.menu.button"),
