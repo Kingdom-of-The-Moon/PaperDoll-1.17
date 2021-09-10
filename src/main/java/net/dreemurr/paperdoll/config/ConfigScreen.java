@@ -2,6 +2,8 @@ package net.dreemurr.paperdoll.config;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 
@@ -11,7 +13,7 @@ public class ConfigScreen extends Screen {
     private ConfigListWidget configListWidget;
 
     public ConfigScreen(Screen parentScreen) {
-        super(new TranslatableText("paperdoll.menu.title"));
+        super(new TranslatableText("chatTimeStamp.gui.configTitle"));
         this.parentScreen = parentScreen;
     }
 
@@ -21,13 +23,13 @@ public class ConfigScreen extends Screen {
 
         this.addDrawableChild(new ButtonWidget(this.width / 2 - 154, this.height - 29, 150, 20, new TranslatableText("gui.cancel"), (buttonWidgetx) -> {
             Config.discardConfig();
-            this.client.openScreen(parentScreen);
+            this.client.setScreen(parentScreen);
         }));
 
         this.addDrawableChild(new ButtonWidget(this.width / 2 + 4, this.height - 29, 150, 20, new TranslatableText("gui.done"), (buttonWidgetx) -> {
             Config.copyConfig();
             Config.saveConfig();
-            this.client.openScreen(parentScreen);
+            this.client.setScreen(parentScreen);
         }));
 
         this.configListWidget = new ConfigListWidget(this, this.client);
@@ -36,7 +38,9 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.client.openScreen(parentScreen);
+        Config.copyConfig();
+        Config.saveConfig();
+        this.client.setScreen(parentScreen);
     }
 
     @Override
@@ -52,5 +56,34 @@ public class ConfigScreen extends Screen {
 
         //screen title
         drawCenteredText(matrices, this.textRenderer, this.title, this.width / 2, 12, 16777215);
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (configListWidget.focusedBinding != null) {
+            configListWidget.focusedBinding.setBoundKey(InputUtil.Type.MOUSE.createFromCode(button));
+            configListWidget.focusedBinding = null;
+
+            KeyBinding.updateKeysByCode();
+
+            return true;
+        } else {
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (configListWidget.focusedBinding != null) {
+            configListWidget.focusedBinding.setBoundKey(keyCode == 256 ? InputUtil.UNKNOWN_KEY: InputUtil.fromKeyCode(keyCode, scanCode));
+            configListWidget.focusedBinding = null;
+
+            KeyBinding.updateKeysByCode();
+
+            return true;
+        }
+        else {
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
     }
 }

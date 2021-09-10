@@ -26,6 +26,6 @@ public abstract class SkinOptionsScreenMixin extends GameOptionsScreen {
                 this.width - 105, this.height - 25,
                 100, 20,
                 new TranslatableText("paperdoll.menu.button"),
-                button -> this.client.openScreen(new ConfigScreen(this))));
+                button -> this.client.setScreen(new ConfigScreen(this))));
     }
 }

@@ -11,9 +11,10 @@ group = project.maven_group
 
 repositories {
 	maven {
-		name = "modmenu"
-		url = "https://maven.terraformersmc.com/releases/"
+		name = 'TerraformersMC'
+		url = 'https://raw.githubusercontent.com/TerraformersMC/Archive/main/releases/'
 	}
+	mavenCentral()
 }
 
 dependencies {
@@ -27,6 +28,13 @@ dependencies {
 
 	// ModMenu
 	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+	// Clone library to fix figura ;-;
+	implementation "io.github.kostaskougios:cloning:1.10.3"
+	include "io.github.kostaskougios:cloning:1.10.3"
+
+	implementation 'org.objenesis:objenesis:3.2'
+	include 'org.objenesis:objenesis:3.2'
 }
 
 processResources {

@@ -2,7 +2,7 @@
 Bedrock Paperdoll ported to Minecraft Java
 
 ## License
-Distributed under the Mozilla Public License 2.0. See `LICENSE` for more information.
+Distributed under the GNU LESSER GENERAL PUBLIC LICENSE 2.1. See `LICENSE` for more information.
 
 ## Build
 If you want to build this yourself, please clone the repository and execute `gradlew build` in the projects folder. 

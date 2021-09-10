@@ -9,7 +9,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -27,7 +26,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
     private final ConfigScreen parent;
 
     //focused binding
-    private KeyBinding focusedBinding;
+    public KeyBinding focusedBinding;
 
     //text types
     public static final Predicate<String> ANY = s -> true;
@@ -57,12 +56,12 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         this.addEntry(new ConfigListWidget.InputEntry(new TranslatableText("paperdoll.menu.config.delay"), new TranslatableText("paperdoll.menu.config.delay.tooltip"), Config.entries.get("delay"), INT));
         this.addEntry(new ConfigListWidget.InputEntry(new TranslatableText("paperdoll.menu.config.bounds"), new TranslatableText("paperdoll.menu.config.bounds.tooltip"), Config.entries.get("bounds"), INT));
         this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.debugRender"), new TranslatableText("paperdoll.menu.config.debugRender.tooltip"), Config.entries.get("debugRender")));
+        this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.nametag"), new TranslatableText("paperdoll.menu.config.nametag.tooltip"), Config.entries.get("nametag")));
 
         //category
         this.addEntry(new ConfigListWidget.CategoryEntry(new TranslatableText("paperdoll.menu.config.extra")));
 
         //entries
-        this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.nametag"), new TranslatableText("paperdoll.menu.config.nametag.tooltip"), Config.entries.get("nametag")));
         this.addEntry(new ConfigListWidget.BooleanEntry(new TranslatableText("paperdoll.menu.config.enablemod"), new TranslatableText("paperdoll.menu.config.enablemod.tooltip"), Config.entries.get("enablemod")));
     }
 
@@ -86,21 +85,6 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (this.focusedBinding != null) {
-            this.focusedBinding.setBoundKey(keyCode == 256 ? InputUtil.UNKNOWN_KEY: InputUtil.fromKeyCode(keyCode, scanCode));
-            this.focusedBinding = null;
-
-            KeyBinding.updateKeysByCode();
-
-            return true;
-        }
-        else {
-            return super.keyPressed(keyCode, scanCode, modifiers);
-        }
-    }
-
     public class CategoryEntry extends Entry {
         //properties
         private final Text text;
@@ -114,7 +98,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
             TextRenderer textRenderer = ConfigListWidget.this.client.textRenderer;
             Text text = this.text;
             int textWidth = ConfigListWidget.this.client.textRenderer.getWidth(this.text);
-            float xPos = (float)(ConfigListWidget.this.client.currentScreen.width / 2 - textWidth / 2);
+            float xPos = (float) (ConfigListWidget.this.client.currentScreen.width / 2 - textWidth / 2);
             int yPos = y + entryHeight;
             textRenderer.draw(matrices, text, xPos, (float)(yPos - 9 - 1), 16777215);
         }
@@ -129,7 +113,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         }
 
         @Override
-        public List<? extends Selectable> method_37025() {
+        public List<? extends Selectable> selectableChildren() {
             return Collections.emptyList();
         }
     }
@@ -198,7 +182,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         }
 
         @Override
-        public List<? extends Selectable> method_37025() {
+        public List<? extends Selectable> selectableChildren() {
             return Arrays.asList(this.toggle, this.reset);
         }
 
@@ -279,7 +263,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         }
 
         @Override
-        public List<? extends Selectable> method_37025() {
+        public List<? extends Selectable> selectableChildren() {
             return Arrays.asList(this.toggle, this.reset);
         }
 
@@ -370,7 +354,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         }
 
         @Override
-        public List<? extends Selectable> method_37025() {
+        public List<? extends Selectable> selectableChildren() {
             return Arrays.asList(this.field, this.reset);
         }
 
@@ -395,7 +379,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
 
     public class KeyBindEntry extends Entry {
         //entry
-        private final ConfigEntry<Integer> config;
+        private final Config.ConfigEntry<Integer> config;
 
         //values
         private final Text display;
@@ -468,7 +452,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> 
         }
 
         @Override
-        public List<? extends Selectable> method_37025() {
+        public List<? extends Selectable> selectableChildren() {
             return Arrays.asList(this.toggle, this.reset);
         }
 

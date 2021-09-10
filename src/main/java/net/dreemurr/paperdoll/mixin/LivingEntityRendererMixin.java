@@ -1,7 +1,6 @@
 package net.dreemurr.paperdoll.mixin;
 
-import net.dreemurr.paperdoll.config.Config;
-import net.minecraft.client.MinecraftClient;
+import net.dreemurr.paperdoll.PaperDoll;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -22,7 +21,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Inject(method = "hasLabel", at = @At("HEAD"), cancellable = true)
     public void hasLabel(T livingEntity, CallbackInfoReturnable<Boolean> cir) {
-        if ((boolean) Config.entries.get("nametag").value && MinecraftClient.isHudEnabled() && livingEntity == MinecraftClient.getInstance().player)
-            cir.setReturnValue(true);
+        if (!PaperDoll.nameplate)
+            cir.setReturnValue(false);
     }
 }

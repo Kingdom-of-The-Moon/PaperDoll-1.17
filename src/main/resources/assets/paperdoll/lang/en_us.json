@@ -30,8 +30,8 @@
   "paperdoll.menu.config.bounds": "Bounds Size",
   "paperdoll.menu.config.bounds.tooltip": "Size of the paperdoll rendering \"box\"",
 
-  "paperdoll.menu.config.nametag": "Render own nametag",
-  "paperdoll.menu.config.nametag.tooltip": "Render your own nametag",
+  "paperdoll.menu.config.nametag": "Render nametag",
+  "paperdoll.menu.config.nametag.tooltip": "Render your nametag on the paperdoll",
 
   "paperdoll.menu.config.debugRender": "Render in Debug Screen",
   "paperdoll.menu.config.debugRender.tooltip": "Render the paperdoll when the debug screen is open",

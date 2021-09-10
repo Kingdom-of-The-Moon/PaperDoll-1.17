@@ -1,6 +1,7 @@
 package net.dreemurr.paperdoll.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.dreemurr.paperdoll.PaperDoll;
 import net.dreemurr.paperdoll.config.Config;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -10,9 +11,9 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.Quaternion;
+import net.minecraft.util.math.Vec3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,7 +62,11 @@ public class InGameHudMixin extends DrawableHelper {
         screenHeight = this.client.getWindow().getHeight();
 
         //draw
-        drawEntity(15 + (int) Config.entries.get("x").value, 60 + (int) Config.entries.get("y").value, (int) (30 * (float) Config.entries.get("scale").value), (int) Config.entries.get("rotation").value, player);
+        try {
+            drawEntity(15 + (int) Config.entries.get("x").value, 60 + (int) Config.entries.get("y").value, (int) (30 * (float) Config.entries.get("scale").value), (int) Config.entries.get("rotation").value, PaperDoll.CLONER.shallowClone(player));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void drawEntity(int x, int y, int size, float rotation, LivingEntity entity) {
@@ -124,12 +129,16 @@ public class InGameHudMixin extends DrawableHelper {
         entityRenderDispatcher.setRenderShadows(false);
         VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
 
+        //nameplate
+        PaperDoll.nameplate = (boolean) Config.entries.get("nametag").value;
+
         //render
         int box = (int) ((int) Config.entries.get("bounds").value * guiScale * (float) Config.entries.get("scale").value);
         RenderSystem.enableScissor(x * guiScale - box / 2, screenHeight - y * guiScale - box / 2 + 30 * guiScale, box, box);
         RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixStack2, immediate, 15728880));
         RenderSystem.disableScissor();
 
+        PaperDoll.nameplate = true;
         immediate.draw();
         entityRenderDispatcher.setRenderShadows(true);
         entity.bodyYaw = h;
