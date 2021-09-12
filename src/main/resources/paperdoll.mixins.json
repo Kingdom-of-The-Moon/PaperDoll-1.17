@@ -7,7 +7,6 @@
   ],
   "client": [
     "LivingEntityRendererMixin",
-    "InGameHudMixin",
     "SkinOptionsScreenMixin"
   ],
   "injectors": {
